@@ -1,0 +1,34 @@
+import type { NextAuthConfig } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+
+export const authConfig: NextAuthConfig = {
+  providers: [
+    Credentials({
+      name: "guest",
+      credentials: {},
+      async authorize() {
+        return {
+          id: "guest",
+          name: "Guest User",
+          email: "guest@example.com",
+        };
+      },
+    }),
+  ],
+  pages: {
+    signIn: "/login",
+    newUser: "/",
+  },
+  callbacks: {
+    async session({ session, token }) {
+      session.user = token.user as any;
+      return session;
+    },
+    async jwt({ token }) {
+      token.user = { id: "guest", name: "Guest User" };
+      return token;
+    },
+  },
+  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
+};
